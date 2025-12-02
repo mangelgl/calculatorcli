@@ -1,0 +1,18 @@
+name: Revision de Sintaxis PHP
+
+on: [push]
+
+jobs:
+  verificar-sintaxis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar tu código (Checkout)
+        uses: actions/checkout@v4
+
+      - name: Instalar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Ejecutar Linter (php -l)
+        run: find . -name "*.php" -exec php -l {} \;
