@@ -10,4 +10,8 @@ class Calculadora {
     public function restar($a, $b) {
         return $a - $b;
     }
+
+     function multiplicar() {
+        return $c + $d
+     }
 }
