@@ -11,7 +11,7 @@ class Calculadora {
         return $a - $b;
     }
 
-    public multiplicar($a, $b) {
+    public function multiplicar($a, $b) {
         return $a * $b;
     }
 }
