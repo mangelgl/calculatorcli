@@ -29,3 +29,19 @@ jobs:
 
       - name: Construir imagen Docker
         run: docker build -t calculadora-cli .
+
+  despliegue:
+    needs: [verificar-sintaxis, construir-imagen]
+    runs-on: self-hosted
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Construir la imagen
+        run: docker build -t calculatorcli-prod .
+
+      - name: Despliegue de contenedor
+        run: |
+          echo "🚀 Desplegando en el servidor..."
+          docker run --rm calculatorcli-prod
+          echo "🆗 ¡Ejecución en servidor completada con éxito!"
