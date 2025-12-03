@@ -24,5 +24,8 @@ jobs:
   construir-imagen:
     runs-on: ubuntu-latest
     steps:
+      - name: Descargar el código
+        run: actions/checkout@v4
+
       - name: Construir imagen Docker
         run: docker build -t calculadora-cli .
