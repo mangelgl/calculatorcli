@@ -17,3 +17,6 @@ jobs:
       - name: Ejecutar Linter (Modo Estricto)
         run: |
           find . -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Ejecutar Tests
+        run: php tests.php
