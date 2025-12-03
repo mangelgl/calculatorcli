@@ -43,5 +43,5 @@ jobs:
       - name: Despliegue de contenedor
         run: |
           echo "🚀 Desplegando en el servidor..."
-          docker run --rm calculadora-prod
+          docker run --rm calculatorcli-prod
           echo "🆗 ¡Ejecución en servidor completada con éxito!"
