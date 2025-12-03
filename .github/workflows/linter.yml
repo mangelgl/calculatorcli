@@ -60,4 +60,4 @@ jobs:
           docker rm calculatorcli-prod || true
           # Descargamos usando secrets
           docker pull ${{ secrets.DOCKERHUB_USERNAME}}/calculatorcli:latest
-          docker run --name calculatorcli-prod ${{ secrets.DOCKERHUB_USERNAME }}/calculatorcli:latest
+          docker run -d --name calculatorcli-prod ${{ secrets.DOCKERHUB_USERNAME }}/calculatorcli:latest tail -f /dev/null
