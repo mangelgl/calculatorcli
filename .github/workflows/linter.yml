@@ -20,3 +20,9 @@ jobs:
 
       - name: Ejecutar Tests
         run: php tests.php
+
+  construir-imagen:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Construir imagen Docker
+        run: docker build -t calculadora-cli .
