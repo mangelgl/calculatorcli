@@ -14,4 +14,8 @@ class Calculadora {
     public function multiplicar($a, $b) {
         return $a * $b;
     }
+
+    public function dividir($a, $b) {
+	return $a / $b;
+    }
 }

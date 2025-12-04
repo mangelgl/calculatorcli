@@ -26,6 +26,16 @@ if ($calc->restar(5, 3) !== 2) {
 if ($calc->multiplicar(3,4) !== 12) {
     echo "❌ Error: 3 x 4 debería ser 12\n";
     $errores = true;
+} else {
+    echo "Multiplicación OK\n";
+}
+
+// Test 4: Probar la división
+if ($calc->dividir(40,4) !== 10) {
+    echo "❌ Error 40 / 4 debería ser 10\n";
+    $errores = true;
+} else {
+    echo "División OK\n";
 }
 
 // Si hubo errores, avisar a GitHub Actions con un código de salida distinto de 0
