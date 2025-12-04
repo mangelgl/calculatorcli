@@ -1,63 +1,62 @@
-name: Revision de Sintaxis PHP
+name: Pipeline CI/CD
 
-on: [push]
+on:
+  push:
+    branches: ["main"]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: ["main"]
 
 jobs:
-  verificar-sintaxis:
+  quality-control:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar tu código (Checkout)
-        uses: actions/checkout@v4
-
-      - name: Instalar PHP
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+      - run: find . -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      - name: Ejecutar Linter (Modo Estricto)
-        run: |
-          find . -name "*.php" -print0 | xargs -0 -n1 php -l
-
-      - name: Ejecutar Tests
-        run: php tests.php
-
-  construir-y-publicar:
-    needs: verificar-sintaxis
+  unit-tests:
+    needs: quality-control
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar el código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - run: php tests.php
 
-      - name: Login en Docker Hub
-        uses: docker/login-action@v3
+  build-push:
+    needs: unit-tests
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Construir y subir
+      - name: Construir y subir a DockerHub
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME}}/calculatorcli:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/calculatorcli:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/calculatorcli:${{ github.ref_name }}
 
-  despliegue:
-    needs: [verificar-sintaxis, construir-y-publicar]
+  deploy:
+    needs: build-push
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: self-hosted
     steps:
-#      - name: Descargar el código
-#        uses: actions/checkout@v4
-
-#      - name: Construir la imagen
-#        run: docker build -t calculatorcli-prod .
-
-      - name: Login en Docker Hub
-        run: echo "${{ secrets.DOCKERHUB_PASSWORD}}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME}} --password-stdin
-
-      - name: Actualizar contenedor
+      - name: Deploy on Server
         run: |
-          docker stop calculatorcli-prod || true
-          docker rm calculatorcli-prod || true
-          # Descargamos usando secrets
-          docker pull ${{ secrets.DOCKERHUB_USERNAME}}/calculatorcli:latest
-          docker run -d --name calculatorcli-prod ${{ secrets.DOCKERHUB_USERNAME }}/calculatorcli:latest tail -f /dev/null
+          # Login
+          echo "${{ secrets.DOCKERHUB_PASSWORD}}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME}} --password-stdin
+          # Limpieza
+          docker stop calculatorcli-prod
+          docker rm calculatorcli-prod
+          # Usamos la versión específica del tag para mayor seguridad
+          docker pull ${{ secrets.DOCKERHUB_USERNAME}}/calculatorcli:${{ github.ref_name }}
+          # Lanzamos el contenedor
+          docker run -d --name calculatorcli-prod ${{ secrets.DOCKERHUB_USERNAME }}/calculatorcli:${{ github.ref_name }} tail -f /dev/null
